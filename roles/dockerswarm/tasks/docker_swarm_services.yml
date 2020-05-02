@@ -1,0 +1,7 @@
+- name: docker_swarm_services
+  docker_stack:
+    state: present
+    name: docker_swarm_services
+    compose:
+      - /vagrant/docker-compose.yml
+  when: "inventory_hostname == groups['docker_swarm_manager'][0]"

@@ -1,0 +1,5 @@
+server {
+    location / {
+        proxy_pass http://192.168.17.100:3000;
+    }
+}

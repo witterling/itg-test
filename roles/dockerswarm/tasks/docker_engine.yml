@@ -1,0 +1,47 @@
+- name: Import Docker APT public key.
+  apt_key:
+    keyserver: "{{ docker_pubkey_server }}"
+    id: "{{ docker_pubkey_id }}"
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Install basic list of packages
+  apt:
+    name: ['apt-transport-https','ca-certificates','curl','gnupg2','software-properties-common']
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Add the APT Docker repository.
+  apt_repository:
+    repo: "{{ docker_apt_repo }}"
+    state: present    
+  when: ansible_os_family == 'Debian'
+
+- name: Install Docker dependencies.
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ docker_dependencies }}"
+
+- name: Add Docker GPG key
+  apt_key: 
+    url: "https://download.docker.com/linux/ubuntu/gpg"
+    state: present
+
+- name: Install docker-ce and docker-compose
+  package:
+    name: ['docker-ce','docker-compose']
+    update_cache: yes
+    state: present
+
+- name: Install docker_stack requirments
+  pip:
+    name: '{{ docker_stack_requirements }}'
+    state: present
+  with_items: "{{ docker_stack_requirements }}"    
+
+- name: Enable the Docker daemon as a service and start it.
+  service:
+    name: docker
+    state: started
+    enabled: yes

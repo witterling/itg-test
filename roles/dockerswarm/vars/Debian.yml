@@ -1,0 +1,32 @@
+default_docker_dependencies:
+  - linux-image-extra-virtual
+
+python_pip_packages:
+  - python-pip
+  - python3-pip
+
+
+python_sni_support_packages:
+  - python-dev
+  - libssl-dev
+  - libffi-dev
+
+python_sni_pip_dependencies:
+  - pyopenssl
+  - ndg-httpsclient
+  - pyasn1
+
+docker_stack_requirements:
+  - jsondiff
+  - pyyaml
+
+docker_pubkey_id: "58118E89F3A912897C070ADBF76221572C52609D"
+docker_pubkey_server: "hkp://ha.pool.sks-keyservers.net:80"
+
+docker_apt_repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} $(lsb_release -cs) stable"
+
+# Name of the Docker group
+docker_group: "docker"
+
+# Name of the SSH Deamon
+ssh_daemon: sshd

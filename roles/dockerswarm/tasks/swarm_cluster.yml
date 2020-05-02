@@ -1,0 +1,54 @@
+- name: Check if "Swarm Mode" is enabled.
+  shell: docker info
+  changed_when: False
+  register: docker_info
+
+- name: Init "Swarm Mode" on docker_swarm_manager.
+  shell: docker swarm init --advertise-addr {{adv_addr}}
+  when: "docker_info.stdout.find('Swarm: active') == -1
+    and inventory_hostname == groups['docker_swarm_manager'][0]"
+
+- name: "Register worker token"
+  shell: docker swarm join-token worker | grep token | awk '{print $5}'
+  register: worker_token
+  when: "inventory_hostname == groups['docker_swarm_manager'][0]"
+
+- name: "Register manager token"
+  shell: docker swarm join-token manager | grep token | awk '{print $5}'
+  register: manager_token
+  when: "inventory_hostname == groups['docker_swarm_manager'][0]"
+
+- debug: msg="{{manager_token.stdout}}"
+  when: "inventory_hostname == groups['docker_swarm_manager'][0]"
+- debug: msg="{{worker_token.stdout}}"
+  when: "inventory_hostname == groups['docker_swarm_manager'][0]"
+
+- file: state=absent name={{item}}
+  become: false 
+  delegate_to: localhost
+  with_items: 
+    - "/vagrant/tmp/manager.token"
+    - "/vagrant/tmp/worker.token"
+  when: "inventory_hostname == groups['docker_swarm_manager'][0]"
+
+- name: "Save worker token {{worker_token.stdout}}"
+  delegate_to: localhost
+  become: false
+  lineinfile:
+    state: present
+    create: yes
+    dest: "/vagrant/tmp/worker.token"
+    line: "{{worker_token.stdout}}"
+  when: "'worker_token'
+          and inventory_hostname == groups['docker_swarm_manager'][0]"
+  
+- name: "Save manager token {{manager_token.stdout}}"
+  delegate_to: localhost
+  become: false
+  lineinfile:
+    state: present
+    create: yes
+    dest: "/vagrant/tmp/manager.token"
+    line: "{{manager_token.stdout}}"
+  when: "'manager_token'
+          and inventory_hostname == groups['docker_swarm_manager'][0]"

@@ -1,0 +1,14 @@
+- name: "Register worker token"
+  delegate_to: localhost
+  become: false
+  shell: cat /vagrant/tmp/worker.token
+  register: worker_token
+  when: "docker_info.stdout.find('Swarm: active') == -1
+    and docker_info.stdout.find('Swarm: pending') == -1
+    and 'docker_swarm_worker' in group_names"
+
+- name: "Register workers to swarm"
+  shell: "docker swarm join --token {{worker_token.stdout}} {{adv_addr}}"
+  when: "docker_info.stdout.find('Swarm: active') == -1
+    and docker_info.stdout.find('Swarm: pending') == -1
+    and 'docker_swarm_worker' in group_names"
