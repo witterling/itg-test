@@ -1,5 +1,20 @@
 server {
+    listen 8081;
     location / {
-        proxy_pass http://192.168.17.100:3000;
+        proxy_pass http://192.168.17.100:3000/;
+    }
+}
+
+server {
+    listen 8082;
+    location / {
+        proxy_pass http://192.168.17.100:9090/;
+    }
+}
+
+server {
+    listen 8083;
+    location / {
+        proxy_pass http://192.168.17.100:5601/;
     }
 }
